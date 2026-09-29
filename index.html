@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Kora Gestión Humana</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdn.jsdelivr.net/gh/KoraDevsOrg/kora-web-sdk@main/kora-sync.js"></script>
+</head>
+<body>
+
+  <!-- Backdrop accesible del Drawer -->
+  <div id="drawerBackdrop" class="drawer-backdrop"></div>
+
+  <!-- Menú Lateral: Conector de Módulos ERP -->
+  <aside id="sideDrawer" class="side-drawer">
+    <div class="drawer-header">
+      <h2 style="font-size: 1.15rem; font-weight: 800; color: #fff;">Ecosistema Kora</h2>
+      <button id="btnCloseDrawer" class="btn-icon">✕</button>
+    </div>
+    
+    <div class="drawer-section-title">SUITE DE NEGOCIO DESCENTRALIZADA</div>
+    <nav class="drawer-list">
+      <button class="drawer-item" data-action="ext-inventario">📦 Gestión de Inventario</button>
+      <button class="drawer-item" data-action="ext-fabricacion">⚙️ Fabricación & Órdenes</button>
+      <button class="drawer-item" data-action="ext-ventas">🏷️ Ventas & Mostrador</button>
+      <button class="drawer-item" data-action="ext-costos">💡 Costos & Servicios</button>
+      <button class="drawer-item active" data-action="home">👥 Gestión Humana (RRHH)</button>
+      <button class="drawer-item" data-action="ext-financiero">📊 Financiero & Cuentas</button>
+    </nav>
+
+    <div class="drawer-footer">
+      <small style="color: var(--text-sub); display: block; margin-bottom: 8px;">Kora Admin DB (Motor Central)</small>
+      <button id="btnOpenKoraAdmin" class="btn-secondary" style="width: 100%; font-size: 0.8rem;">
+        ⚙️ Administrar Bases de Datos
+      </button>
+    </div>
+  </aside>
+
+  <!-- Encabezado Principal -->
+  <header>
+    <div class="header-left">
+      <button id="btnOpenDrawer" class="btn-icon">☰</button>
+      <h1 id="headerTitle" style="font-size: 1.1rem; font-weight: 800;">Kora RRHH</h1>
+    </div>
+    <div class="offline-badge">100% Offline</div>
+  </header>
+
+  <!-- Contenedor Principal donde se montan las Vistas -->
+  <main id="appContent"></main>
+
+  <!-- ========================================== -->
+  <!-- PLANTILLAS DE VISTAS (TEMPLATES)          -->
+  <!-- ========================================== -->
+
+  <!-- 1. PANTALLA PRINCIPAL: HUB TÁCTIL RRHH -->
+  <template id="tmpl-home-view">
+    <div class="hub-grid">
+      <div class="hub-card" id="btnActionEmployees">
+        <div class="hub-icon-badge icon-purple">👥</div>
+        <div class="hub-info">
+          <div class="hub-title">Colaboradores & Salarios</div>
+          <div class="hub-desc">Fichas de personal, roles y cálculo del costo por minuto.</div>
+        </div>
+      </div>
+
+      <div class="hub-card" id="btnActionNewEmp">
+        <div class="hub-icon-badge icon-blue">➕</div>
+        <div class="hub-info">
+          <div class="hub-title">Registrar Colaborador</div>
+          <div class="hub-desc">Alta de personal fijo, por día, por hora o para el propio dueño.</div>
+        </div>
+      </div>
+
+      <div class="hub-card" id="btnActionTurnos">
+        <div class="hub-icon-badge icon-orange">⏱️</div>
+        <div class="hub-info">
+          <div class="hub-title">Control de Asistencia & Turnos</div>
+          <div class="hub-desc">Registro de entradas, salidas y liquidación del costo de jornada.</div>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- 2. VISTA: LISTA DE COLABORADORES -->
+  <template id="tmpl-employees-view">
+    <div class="card-header-bar" style="margin-bottom: 14px;">
+      <h2 style="font-size: 1.1rem; color: #fff; font-weight: 800;">Equipo de Trabajo</h2>
+      <button type="button" class="btn-icon" id="btnBackHomeEmp">←</button>
+    </div>
+
+    <div style="margin-bottom: 14px;">
+      <button id="btnGoNewEmpFromList" class="btn-primary" style="width: 100%;">+ Nuevo Colaborador</button>
+    </div>
+
+    <div id="employeesListContainer" class="items-list"></div>
+  </template>
+
+  <!-- 3. FORMULARIO: REGISTRAR / EDITAR COLABORADOR -->
+  <template id="tmpl-emp-form-view">
+    <div class="card">
+      <div class="card-header-bar" style="margin-bottom: 14px;">
+        <h2 class="card-title" id="empFormTitle">Ficha del Colaborador</h2>
+        <button type="button" class="btn-icon" id="btnBackEmpForm">←</button>
+      </div>
+
+      <form id="empForm">
+        <input type="hidden" id="empId">
+        
+        <div class="form-group">
+          <label>Nombre Completo:</label>
+          <input type="text" id="empNombre" class="input-field" required placeholder="Ej: Pedro Martínez, Juan Pérez">
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Rol / Oficio:</label>
+            <input type="text" id="empRol" class="input-field" required placeholder="Ej: Operario, Cocinero, Lavador">
+          </div>
+          <div class="form-group">
+            <label>Documento / Cédula:</label>
+            <input type="text" id="empDoc" class="input-field" placeholder="Opcional">
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Modalidad de Salario:</label>
+            <select id="empTipoPago" class="input-field">
+              <option value="FIJO_MENSUAL">Fijo Mensual</option>
+              <option value="POR_HORA">Por Día / Por Hora</option>
+              <option value="DUENO">Sueldo Asignado al Dueño</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label id="lblSalarioBase">Salario Mensual Pactado ($):</label>
+            <input type="number" step="any" id="empSalarioBase" class="input-field" value="1300000" required>
+          </div>
+        </div>
+
+        <!-- Calculadora Automática de Costo Minuto -->
+        <div class="calc-highlight-box">
+          <div style="font-size: 0.8rem; color: var(--text-sub);">Costo Calculado para Producción y Mano de Obra:</div>
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px;">
+            <span style="font-size: 0.75rem; color: var(--accent-blue);" id="lblCalcFormula">Basado en 8h/día (48h sem)</span>
+            <div style="font-size: 1.35rem; font-weight: 800; color: var(--accent-gold);">
+              $<span id="outCostoMinuto">112.85</span> <small style="font-size:0.8rem;">/ min</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 10px;">
+          <label>Teléfono de Contacto:</label>
+          <input type="text" id="empTelefono" class="input-field" placeholder="Ej: 300 123 4567">
+        </div>
+
+        <div class="form-actions" style="margin-top: 18px;">
+          <button type="button" class="btn-secondary" id="btnCancelEmp">Cancelar</button>
+          <button type="submit" class="btn-primary">Guardar Colaborador</button>
+        </div>
+      </form>
+    </div>
+  </template>
+
+  <!-- 4. VISTA: CONTROL DE ASISTENCIA Y TURNOS -->
+  <template id="tmpl-turnos-view">
+    <div class="card-header-bar" style="margin-bottom: 14px;">
+      <h2 style="font-size: 1.1rem; color: #fff; font-weight: 800;">Turnos & Asistencia</h2>
+      <button type="button" class="btn-icon" id="btnBackHomeTurnos">←</button>
+    </div>
+
+    <!-- Apertura de Turno Rápido -->
+    <div class="card">
+      <h3 style="font-size: 0.95rem; color: var(--accent-gold); margin-bottom: 10px;">Iniciar Nueva Jornada</h3>
+      <div style="display: flex; gap: 8px;">
+        <select id="selEmpTurno" class="input-field" style="flex: 2;"></select>
+        <button id="btnStartTurno" class="btn-primary" style="flex: 1; padding: 10px 14px; font-size: 0.85rem;">
+          ▶ Entrada
+        </button>
+      </div>
+    </div>
+
+    <!-- Lista de Turnos -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Colaborador</th>
+            <th>Entrada</th>
+            <th>Salida / Min</th>
+            <th>Costo Jornada</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody id="turnosTbody"></tbody>
+      </table>
+    </div>
+  </template>
+
+  <!-- Script Controlador Modular -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
