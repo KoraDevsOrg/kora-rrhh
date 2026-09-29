@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Kora Gestión Humana</title>
   <link rel="stylesheet" href="css/styles.css">
-  <script src="https://cdn.jsdelivr.net/gh/KoraDevsOrg/kora-web-sdk@main/kora-sync.js"></script>[cite: 1]
+  <script src="https://cdn.jsdelivr.net/gh/KoraDevsOrg/kora-web-sdk@main/kora-sync.js"></script>
 </head>
 <body>
 
-  <!-- Backdrop accesible del Drawer -->
+  <!-- Backdrop del Drawer -->
   <div id="drawerBackdrop" class="drawer-backdrop"></div>
 
-  <!-- Menú Lateral: Conector de Módulos ERP -->
+  <!-- Menú Hamburguesa Lateral -->
   <aside id="sideDrawer" class="side-drawer">
     <div class="drawer-header">
       <h2 style="font-size: 1.15rem; font-weight: 800; color: #fff;">Ecosistema Kora</h2>
@@ -28,13 +28,6 @@
       <button class="drawer-item active" data-action="home">👥 Gestión Humana (RRHH)</button>
       <button class="drawer-item" data-action="ext-financiero">📊 Financiero & Cuentas</button>
     </nav>
-
-    <div class="drawer-footer">
-      <small style="color: var(--text-sub); display: block; margin-bottom: 8px;">Kora Admin DB (Motor Central)</small>
-      <button id="btnOpenKoraAdmin" class="btn-secondary" style="width: 100%; font-size: 0.8rem;">
-        ⚙️ Administrar Bases de Datos
-      </button>
-    </div>
   </aside>
 
   <!-- Encabezado Principal -->
@@ -67,7 +60,7 @@
       <div class="hub-card" id="btnActionTurnos">
         <div class="hub-icon-badge icon-orange">⏱️</div>
         <div class="hub-info">
-          <div class="hub-title">Control de Asistencia & Horas Extras</div>
+          <div class="hub-title">Control de Asistencia & Extras</div>
           <div class="hub-desc">Entradas, salidas, recargos nocturnos y festivos discriminados.</div>
         </div>
       </div>
@@ -83,16 +76,16 @@
       <div class="hub-card" id="btnActionNomina">
         <div class="hub-icon-badge icon-green">💰</div>
         <div class="hub-info">
-          <div class="hub-title">Liquidación de Nómina & Pagos</div>
-          <div class="hub-desc">Cálculo de neto a pagar con descuentos, devengados y registro histórico.</div>
+          <div class="hub-title">Nómina, Salud, Pensión & Cesantías</div>
+          <div class="hub-desc">Liquidación legal: devengados, descuentos y prestaciones sociales.</div>
         </div>
       </div>
 
       <div class="hub-card" id="btnActionConfig">
         <div class="hub-icon-badge icon-gold">⚙️</div>
         <div class="hub-info">
-          <div class="hub-title">Configuración Legal & Jornada</div>
-          <div class="hub-desc">Horarios diurnos/nocturnos, porcentajes de ley, festivos y clave maestra.</div>
+          <div class="hub-title">Configuración Legal & Porcentajes</div>
+          <div class="hub-desc">Ajuste de % para extras, nocturnas, festivos, salud y cesantías.</div>
         </div>
       </div>
     </div>
@@ -112,7 +105,7 @@
     <div id="employeesListContainer" class="items-list"></div>
   </template>
 
-  <!-- 3. FORMULARIO: REGISTRAR / EDITAR COLABORADOR (CON HOJA DE VIDA Y HABEAS DATA) -->
+  <!-- 3. FORMULARIO: REGISTRAR / EDITAR COLABORADOR -->
   <template id="tmpl-emp-form-view">
     <div class="card">
       <div class="card-header-bar" style="margin-bottom: 14px;">
@@ -135,7 +128,7 @@
           </div>
           <div class="form-group">
             <label>Rol / Oficio:</label>
-            <input type="text" id="empRol" class="input-field" required placeholder="Ej: Cocinero, Operario, Cajero">
+            <input type="text" id="empRol" class="input-field" required placeholder="Ej: Cocinero, Cajero, Operario">
           </div>
         </div>
 
@@ -149,31 +142,19 @@
             </select>
           </div>
           <div class="form-group">
-            <label id="lblSalarioBase">Salario Base ($):</label>
-            <input type="number" step="any" id="empSalarioBase" class="input-field" value="1400000" required>
+            <label id="lblSalarioBase">Salario Mensual ($):</label>
+            <input type="number" step="any" id="empSalarioBase" class="input-field" value="1300000" required>
           </div>
         </div>
 
-        <!-- Conversión Matemática a $/Minuto -->
+        <!-- Conversión Matemática a $/Minuto para Fabricación -->
         <div class="calc-highlight-box">
-          <div style="font-size: 0.8rem; color: var(--text-sub);">Costo por Minuto Calculado para Fabricación:</div>
+          <div style="font-size: 0.8rem; color: var(--text-sub);">Costo Calculado para Mano de Obra:</div>
           <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px;">
-            <span style="font-size: 0.75rem; color: var(--accent-blue);" id="lblCalcFormula">Jornada 240 horas/mes</span>
+            <span style="font-size: 0.75rem; color: var(--accent-blue);" id="lblCalcFormula">Jornada mensual (14.400 min)</span>
             <div style="font-size: 1.35rem; font-weight: 800; color: var(--accent-gold);">
-              $<span id="outCostoMinuto">97.22</span> <small style="font-size:0.8rem;">/ min</small>
+              $<span id="outCostoMinuto">90.27</span> <small style="font-size:0.8rem;">/ min</small>
             </div>
-          </div>
-        </div>
-
-        <!-- Horario Programado para cálculo de Horas Extras -->
-        <div class="form-grid" style="margin-top: 10px;">
-          <div class="form-group">
-            <label>Hora Entrada Programada:</label>
-            <input type="time" id="empHoraEntrada" class="input-field" value="08:00">
-          </div>
-          <div class="form-group">
-            <label>Hora Salida Programada:</label>
-            <input type="time" id="empHoraSalida" class="input-field" value="17:00">
           </div>
         </div>
 
@@ -223,7 +204,7 @@
         </div>
 
         <div class="habeas-data-box">
-          🔒 <strong>Aviso de Habeas Data y Privacidad:</strong> La información personal y familiar recopilada permanece almacenada exclusivamente en este dispositivo móvil (LOCAL_SCOPE). No se comparte con terceros ni servicios en la nube. Solo se sincroniza de forma cifrada entre los teléfonos de la red local autorizada en el establecimiento[cite: 5, 8].
+          🔒 <strong>Aviso de Habeas Data y Privacidad:</strong> La información personal y familiar recopilada permanece almacenada exclusivamente en este dispositivo móvil (LOCAL_SCOPE)[cite: 7]. No se comparte con servidores en la nube ni terceros[cite: 7].
         </div>
 
         <div class="form-actions" style="margin-top: 18px;">
@@ -285,10 +266,11 @@
           <div class="form-group">
             <label>Tipo de Novedad:</label>
             <select id="novTipo" class="input-field">
-              <option value="INCAPACIDAD">Incapacidad Médica</option>
-              <option value="VACACIONES">Vacaciones</option>
-              <option value="PERMISO_NO_REMUNERADO">Permiso No Remunerado (Descuento)</option>
-              <option value="PERMISO_REMUNERADO">Permiso Remunerado</option>
+              <option value="INCAPACIDAD_ENFERMEDAD_GENERAL">Incapacidad (Enfermedad General - 66%)</option>
+              <option value="INCAPACIDAD_LABORAL">Incapacidad (Accidente Laboral - 100%)</option>
+              <option value="VACACIONES">Vacaciones Remuneradas (100%)</option>
+              <option value="PERMISO_NO_REMUNERADO">Permiso No Remunerado (0% Descuento)</option>
+              <option value="LICENCIA_MATERNIDAD_PATERNIDAD">Licencia Maternidad / Paternidad (100%)</option>
             </select>
           </div>
           <div class="form-group">
@@ -307,8 +289,8 @@
           </div>
         </div>
         <div class="form-group">
-          <label>Motivo / Observaciones:</label>
-          <input type="text" id="novMotivo" class="input-field" placeholder="Ej: Certificado EPS #440">
+          <label>Motivo / Soporte Médico:</label>
+          <input type="text" id="novMotivo" class="input-field" placeholder="Ej: Certificado EPS #9923">
         </div>
         <button type="submit" class="btn-primary" style="margin-top: 8px;">Registrar Novedad</button>
       </form>
@@ -321,7 +303,7 @@
             <th>Colaborador</th>
             <th>Tipo</th>
             <th>Días</th>
-            <th>Remunerada</th>
+            <th>Pago %</th>
           </tr>
         </thead>
         <tbody id="novedadesTbody"></tbody>
@@ -329,15 +311,15 @@
     </div>
   </template>
 
-  <!-- 6. VISTA: LIQUIDACIÓN DE NÓMINA -->
+  <!-- 6. VISTA: LIQUIDACIÓN COMPLETA (SALUD, PENSIÓN Y CESANTÍAS) -->
   <template id="tmpl-nomina-view">
     <div class="card-header-bar" style="margin-bottom: 14px;">
-      <h2 style="font-size: 1.1rem; color: #fff; font-weight: 800;">Liquidación de Nómina</h2>
+      <h2 style="font-size: 1.1rem; color: #fff; font-weight: 800;">Liquidación de Nómina Legal</h2>
       <button type="button" class="btn-icon" id="btnBackHomeNom">←</button>
     </div>
 
     <div class="card">
-      <h3 style="font-size: 0.95rem; color: var(--accent-gold); margin-bottom: 12px;">Generar Liquidación</h3>
+      <h3 style="font-size: 0.95rem; color: var(--accent-gold); margin-bottom: 12px;">Generar Liquidación Periódica</h3>
       <div class="form-group">
         <label>Colaborador:</label>
         <select id="nomEmpleadoId" class="input-field"></select>
@@ -353,7 +335,7 @@
         </div>
       </div>
       <button id="btnLiquidarNomina" class="btn-primary" style="margin-top: 8px;">
-        Calcular Liquidación con Descuentos
+        Liquidar (Aplica Salud, Pensión, Cesantías y Novedades)
       </button>
     </div>
 
@@ -363,9 +345,10 @@
           <tr>
             <th>Periodo</th>
             <th>Colaborador</th>
-            <th>Devengado</th>
-            <th>Deducciones</th>
-            <th>Neto Pagado</th>
+            <th>Base + Extras</th>
+            <th>Deducciones (Salud+Pens+Nov)</th>
+            <th>Neto Pagar</th>
+            <th>Prestaciones (Cesantías+Prima)</th>
             <th>Estado</th>
           </tr>
         </thead>
@@ -374,15 +357,15 @@
     </div>
   </template>
 
-  <!-- 7. VISTA: CONFIGURACIÓN LEGAL Y RECARGOS -->
+  <!-- 7. VISTA: CONFIGURACIÓN LEGAL, PORCENTAJES Y SEGURIDAD -->
   <template id="tmpl-config-view">
     <div class="card-header-bar" style="margin-bottom: 14px;">
-      <h2 style="font-size: 1.1rem; color: #fff; font-weight: 800;">Configuración de Ley & Red</h2>
+      <h2 style="font-size: 1.1rem; color: #fff; font-weight: 800;">Configuración de Ley & Porcentajes</h2>
       <button type="button" class="btn-icon" id="btnBackHomeConf">←</button>
     </div>
 
     <div class="card">
-      <h3 style="font-size: 0.95rem; color: var(--accent-gold); margin-bottom: 12px;">Parámetros Laborales</h3>
+      <h3 style="font-size: 0.95rem; color: var(--accent-gold); margin-bottom: 12px;">1. Horarios y Recargos de Trabajo</h3>
       <form id="confForm">
         <div class="form-grid">
           <div class="form-group">
@@ -396,33 +379,76 @@
         </div>
         <div class="form-grid">
           <div class="form-group">
-            <label>Recargo Extra Diurna (%):</label>
-            <input type="number" id="confExtraDiurna" class="input-field" value="25">
+            <label>Recargo Nocturno Ordinario (%):</label>
+            <input type="number" step="any" id="confRecargoNocturno" class="input-field" value="35">
           </div>
           <div class="form-group">
-            <label>Recargo Extra Nocturna (%):</label>
-            <input type="number" id="confExtraNocturna" class="input-field" value="75">
+            <label>Recargo Extra Diurna (%):</label>
+            <input type="number" step="any" id="confExtraDiurna" class="input-field" value="25">
           </div>
         </div>
         <div class="form-grid">
           <div class="form-group">
-            <label>Recargo Festivo / Dominical (%):</label>
-            <input type="number" id="confFestivo" class="input-field" value="75">
+            <label>Recargo Extra Nocturna (%):</label>
+            <input type="number" step="any" id="confExtraNocturna" class="input-field" value="75">
           </div>
           <div class="form-group">
-            <label>Recargo Nocturno Ordinario (%):</label>
-            <input type="number" id="confRecargoNocturno" class="input-field" value="35">
+            <label>Recargo Dominical / Festivo (%):</label>
+            <input type="number" step="any" id="confFestivo" class="input-field" value="75">
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Extra Festivo Diurno (%):</label>
+            <input type="number" step="any" id="confExtraFestivoDia" class="input-field" value="100">
+          </div>
+          <div class="form-group">
+            <label>Extra Festivo Nocturno (%):</label>
+            <input type="number" step="any" id="confExtraFestivoNoc" class="input-field" value="150">
           </div>
         </div>
 
         <hr style="border: 0; border-top: 1px solid var(--border); margin: 16px 0;">
-        <h3 style="font-size: 0.85rem; color: var(--accent-blue); margin-bottom: 8px;">Seguridad de Red (Lugar de Trabajo)</h3>
+        <h3 style="font-size: 0.95rem; color: var(--accent-gold); margin-bottom: 12px;">2. Seguridad Social & Deducciones de Ley</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Deducción Salud Trabajador (%):</label>
+            <input type="number" step="any" id="confDescSalud" class="input-field" value="4">
+          </div>
+          <div class="form-group">
+            <label>Deducción Pensión Trabajador (%):</label>
+            <input type="number" step="any" id="confDescPension" class="input-field" value="4">
+          </div>
+        </div>
         <div class="form-group">
-          <label>Identificador Wi-Fi Autorizado (BSSID/MAC):</label>
-          <input type="text" id="confBssid" class="input-field" placeholder="Opcional: Permite sincronizar solo en la tienda">
+          <label>Auxilio de Transporte Mensual ($):</label>
+          <input type="number" step="any" id="confAuxTransporte" class="input-field" value="162000">
         </div>
 
-        <button type="submit" class="btn-primary" style="margin-top: 12px;">Guardar Parámetros de Ley</button>
+        <hr style="border: 0; border-top: 1px solid var(--border); margin: 16px 0;">
+        <h3 style="font-size: 0.95rem; color: var(--accent-gold); margin-bottom: 12px;">3. Prestaciones Sociales (Provisión Empresa)</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Cesantías (%):</label>
+            <input type="number" step="any" id="confCesantias" class="input-field" value="8.33">
+          </div>
+          <div class="form-group">
+            <label>Intereses de Cesantías (%):</label>
+            <input type="number" step="any" id="confInteresesCesantias" class="input-field" value="1.0">
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Prima de Servicios (%):</label>
+            <input type="number" step="any" id="confPrima" class="input-field" value="8.33">
+          </div>
+          <div class="form-group">
+            <label>Vacaciones (%):</label>
+            <input type="number" step="any" id="confVacaciones" class="input-field" value="4.17">
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary" style="margin-top: 14px;">Guardar Parámetros de Ley</button>
       </form>
     </div>
   </template>
