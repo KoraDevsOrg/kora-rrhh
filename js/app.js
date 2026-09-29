@@ -4,7 +4,10 @@ class HRController {
   constructor() {
     this.store = new HRStore();
     this.mainEl = document.getElementById("appContent");
+    
+    // Asignación segura del Drawer
     this.initDrawer();
+    // Renderizado garantizado del Hub
     this.renderHome();
   }
 
@@ -31,14 +34,6 @@ class HRController {
         else this.showExternalModuleNotice(btn.textContent.trim());
       };
     });
-
-    const btnAdmin = document.getElementById("btnOpenKoraAdmin");
-    if (btnAdmin) {
-      btnAdmin.onclick = () => {
-        toggle(false);
-        window.location.href = "intent://org.koradevs.admindb/#Intent;scheme=package;end";[cite: 3, 5]
-      };
-    }
   }
 
   showExternalModuleNotice(modName) {
@@ -47,7 +42,7 @@ class HRController {
         <span style="font-size: 2.5rem;">🔗</span>
         <h2 style="color: var(--accent-gold); margin: 12px 0; font-size: 1.25rem;">${modName}</h2>
         <p style="color: var(--text-sub); font-size: 0.85rem; line-height: 1.5; margin-bottom: 20px;">
-          Este módulo opera desacoplado para mantener el ecosistema ligero[cite: 5]. Puedes abrirlo o instalarlo desde <strong>Kora Admin DB</strong> para compartir el catálogo común[cite: 3, 5].
+          Este módulo está desacoplado para mantener el ecosistema ligero[cite: 5]. Puedes abrirlo o instalarlo desde <strong>Kora Admin DB</strong> para compartir el catálogo común[cite: 4, 5].
         </p>
         <button id="btnReturnHomeNotice" class="btn-primary" style="width: 100%;">Volver a Gestión Humana</button>
       </div>
@@ -80,7 +75,7 @@ class HRController {
     if (btnConf) btnConf.onclick = () => this.renderConfig();
   }
 
-  // --- 2. LISTADO Y HOJA DE VIDA DE COLABORADORES ---
+  // --- 2. LISTA DE COLABORADORES ---
   renderEmployeesList() {
     this.mountTemplate("tmpl-employees-view");
     document.getElementById("headerTitle").textContent = "Equipo de Trabajo";
@@ -121,7 +116,7 @@ class HRController {
     });
   }
 
-  // --- 3. FORMULARIO COLABORADOR & HABEAS DATA ---
+  // --- 3. FORMULARIO COLABORADOR ---
   renderEmpForm(empId = null) {
     this.mountTemplate("tmpl-emp-form-view");
     document.getElementById("headerTitle").textContent = empId ? "Editar Colaborador" : "Nuevo Colaborador";
@@ -135,12 +130,7 @@ class HRController {
     const tipoPagoSelect = document.getElementById("empTipoPago");
     const salarioInput = document.getElementById("empSalarioBase");
     const outCostoMinuto = document.getElementById("outCostoMinuto");
-    const lblSalario = document.getElementById("lblSalarioBase");
-    const lblFormula = document.getElementById("lblCalcFormula");
 
-    // Hoja de vida
-    const horaIn = document.getElementById("empHoraEntrada");
-    const horaOut = document.getElementById("empHoraSalida");
     const estudios = document.getElementById("empEstudios");
     const estadoCivil = document.getElementById("empEstadoCivil");
     const hijos = document.getElementById("empHijos");
@@ -151,21 +141,7 @@ class HRController {
     const updateCostoMinuto = () => {
       const val = parseFloat(salarioInput.value) || 0;
       const tipo = tipoPagoSelect.value;
-      let costoMin = 0;
-
-      if (tipo === "MENSUAL") {
-        lblSalario.textContent = "Salario Mensual Pactado ($):";
-        lblFormula.textContent = "Basado en 240 horas mensuales (14.400 min)";
-        costoMin = val / 14400;
-      } else if (tipo === "DIARIO") {
-        lblSalario.textContent = "Valor por Día Laborado ($):";
-        lblFormula.textContent = "Jornada 8 horas (480 min)";
-        costoMin = val / 480;
-      } else {
-        lblSalario.textContent = "Valor por Hora ($):";
-        lblFormula.textContent = "60 minutos";
-        costoMin = val / 60;
-      }
+      let costoMin = (tipo === "MENSUAL") ? (val / 14400) : (val / 480);
       outCostoMinuto.textContent = costoMin.toFixed(2);
     };
 
@@ -180,8 +156,6 @@ class HRController {
       rolInput.value = emp.rol_oficio;
       tipoPagoSelect.value = emp.tipo_pago;
       salarioInput.value = emp.salario_base;
-      horaIn.value = emp.hora_entrada_programada || "08:00";
-      horaOut.value = emp.hora_salida_programada || "17:00";
       estudios.value = emp.nivel_estudios || "Bachiller";
       estadoCivil.value = emp.estado_civil || "Soltero/a";
       hijos.value = emp.num_hijos || 0;
@@ -209,8 +183,6 @@ class HRController {
           tipo_pago: tipoPagoSelect.value,
           salario_base: parseFloat(salarioInput.value) || 0,
           costo_minuto: parseFloat(outCostoMinuto.textContent) || 0,
-          hora_entrada_programada: horaIn.value,
-          hora_salida_programada: horaOut.value,
           nivel_estudios: estudios.value,
           estado_civil: estadoCivil.value,
           num_hijos: parseInt(hijos.value, 10) || 0,
@@ -223,10 +195,10 @@ class HRController {
     }
   }
 
-  // --- 4. CONTROL DE ASISTENCIA Y TURNOS ---
+  // --- 4. TURNOS & HORAS EXTRAS ---
   renderTurnos() {
     this.mountTemplate("tmpl-turnos-view");
-    document.getElementById("headerTitle").textContent = "Turnos & Horas Extras";
+    document.getElementById("headerTitle").textContent = "Turnos & Asistencia";
 
     const btnBack = document.getElementById("btnBackHomeTurnos");
     if (btnBack) btnBack.onclick = () => this.renderHome();
@@ -305,13 +277,17 @@ class HRController {
         const fIni = new Date(document.getElementById("novFechaInicio").value).getTime();
         const fFin = new Date(document.getElementById("novFechaFin").value).getTime();
 
+        let pct = 100;
+        if (tipo === "INCAPACIDAD_ENFERMEDAD_GENERAL") pct = 66.6;
+        if (tipo === "PERMISO_NO_REMUNERADO") pct = 0;
+
         this.store.saveNovedad({
           empleado_id: selEmp.value,
           tipo_novedad: tipo,
           dias_duracion: dias,
           fecha_inicio: fIni,
           fecha_fin: fFin,
-          remunerada: tipo === "PERMISO_NO_REMUNERADO" ? 0 : 1,
+          porcentaje_pago: pct,
           motivo: document.getElementById("novMotivo").value.trim()
         });
 
@@ -329,16 +305,16 @@ class HRController {
           <td><strong>${emp.nombre}</strong></td>
           <td><span class="badge badge-progress">${n.tipo_novedad}</span></td>
           <td>${n.dias_duracion} días</td>
-          <td><span class="badge ${n.remunerada ? 'badge-active' : 'badge-danger'}">${n.remunerada ? 'SÍ' : 'NO (DESCUENTO)'}</span></td>
+          <td>${n.porcentaje_pago}%</td>
         </tr>
       `;
     }).join("");
   }
 
-  // --- 6. LIQUIDACIÓN DE NÓMINA Y REGISTRO DE PAGOS ---
+  // --- 6. LIQUIDACIÓN DE NÓMINA ---
   renderNomina() {
     this.mountTemplate("tmpl-nomina-view");
-    document.getElementById("headerTitle").textContent = "Nómina & Pagos";
+    document.getElementById("headerTitle").textContent = "Nómina Legal";
 
     const btnBack = document.getElementById("btnBackHomeNom");
     if (btnBack) btnBack.onclick = () => this.renderHome();
@@ -355,12 +331,12 @@ class HRController {
         const fFin = new Date(document.getElementById("nomFechaFin").value).getTime();
 
         if (!fIni || !fFin) {
-          alert("Selecciona el rango de fechas para liquidar.");
+          alert("Selecciona las fechas de inicio y fin del periodo a liquidar.");
           return;
         }
 
-        const res = this.store.liquidarNominaEmpleado(empId, fIni, fFin);
-        alert(`Nómina Liquidada:\nNeto a pagar: $${res.neto_pagado.toLocaleString()}`);
+        const res = this.store.liquidarNominaCompleta(empId, fIni, fFin);
+        alert(`Liquidación Completada:\nNeto a Pagar: $${res.neto_a_pagar.toLocaleString()}\nCesantías Prov: $${res.cesantias_estimadas.toLocaleString()}`);
         this.renderNominaTable();
       };
     }
@@ -374,7 +350,7 @@ class HRController {
     const emps = this.store.getEmpleados(false);
 
     if (pagos.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-sub); padding:20px;">Sin pagos de nómina liquidados.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-sub); padding:20px;">Sin pagos liquidados.</td></tr>`;
       return;
     }
 
@@ -382,14 +358,16 @@ class HRController {
       const emp = emps.find(e => String(e.id) === String(p.empleado_id)) || { nombre: "Colaborador" };
       const fIni = new Date(p.periodo_inicio).toLocaleDateString();
       const fFin = new Date(p.periodo_fin).toLocaleDateString();
+      const totalPrestaciones = p.cesantias_estimadas + p.intereses_cesantias_estimadas + p.prima_estimada + p.vacaciones_estimadas;
 
       return `
         <tr>
           <td><small>${fIni} - ${fFin}</small></td>
           <td><strong>${emp.nombre}</strong></td>
-          <td>$${p.total_devengado.toLocaleString()}</td>
-          <td style="color:#fca5a5;">-$${p.total_deducciones.toLocaleString()}</td>
-          <td><strong style="color:var(--accent-green);">$${p.neto_pagado.toLocaleString()}</strong></td>
+          <td>$${(p.sueldo_base + p.horas_extras_recargos + p.auxilio_transporte).toLocaleString()}</td>
+          <td style="color:#fca5a5;">-$${(p.deduccion_salud + p.deduccion_pension + p.deduccion_novedades).toLocaleString()}</td>
+          <td><strong style="color:var(--accent-green);">$${p.neto_a_pagar.toLocaleString()}</strong></td>
+          <td><small>$${totalPrestaciones.toLocaleString()}</small></td>
           <td>
             ${p.pagado_flag ? '<span class="badge badge-active">PAGADO</span>' : `<button class="btn-primary btn-sm btn-mark-paid" data-id="${p.id}">Registrar Pago</button>`}
           </td>
@@ -399,16 +377,16 @@ class HRController {
 
     tbody.querySelectorAll(".btn-mark-paid").forEach(btn => {
       btn.onclick = () => {
-        this.store.marcarNominaComoPagada(btn.dataset.id);
+        this.store.marcarPagoRealizado(btn.dataset.id);
         this.renderNominaTable();
       };
     });
   }
 
-  // --- 7. CONFIGURACIÓN LEGAL & RED LOCAL ---
+  // --- 7. CONFIGURACIÓN LEGAL Y RECARGOS ---
   renderConfig() {
     this.mountTemplate("tmpl-config-view");
-    document.getElementById("headerTitle").textContent = "Parámetros Laborales";
+    document.getElementById("headerTitle").textContent = "Parámetros de Ley";
 
     const btnBack = document.getElementById("btnBackHomeConf");
     if (btnBack) btnBack.onclick = () => this.renderHome();
@@ -416,19 +394,35 @@ class HRController {
     const conf = this.store.getConfig();
     const fHoraNoc = document.getElementById("confHoraNocturna");
     const fFinNoc = document.getElementById("confFinNocturna");
+    const fRecNoc = document.getElementById("confRecargoNocturno");
     const fExDia = document.getElementById("confExtraDiurna");
     const fExNoc = document.getElementById("confExtraNocturna");
     const fFest = document.getElementById("confFestivo");
-    const fRecNoc = document.getElementById("confRecargoNocturno");
-    const fBssid = document.getElementById("confBssid");
+    const fExFestDia = document.getElementById("confExtraFestivoDia");
+    const fExFestNoc = document.getElementById("confExtraFestivoNoc");
+    const fSalud = document.getElementById("confDescSalud");
+    const fPension = document.getElementById("confDescPension");
+    const fAux = document.getElementById("confAuxTransporte");
+    const fCes = document.getElementById("confCesantias");
+    const fIntCes = document.getElementById("confInteresesCesantias");
+    const fPrima = document.getElementById("confPrima");
+    const fVac = document.getElementById("confVacaciones");
 
     fHoraNoc.value = conf.hora_inicio_nocturna || "21:00";
     fFinNoc.value = conf.hora_fin_nocturna || "06:00";
+    fRecNoc.value = conf.recargo_nocturno_pct || 35;
     fExDia.value = conf.recargo_extra_diurna_pct || 25;
     fExNoc.value = conf.recargo_extra_nocturna_pct || 75;
     fFest.value = conf.recargo_festivo_pct || 75;
-    fRecNoc.value = conf.recargo_nocturno_pct || 35;
-    fBssid.value = conf.bssid_red_autorizada || "";
+    fExFestDia.value = conf.recargo_extra_festivo_diurna_pct || 100;
+    fExFestNoc.value = conf.recargo_extra_festivo_nocturna_pct || 150;
+    fSalud.value = conf.descuento_salud_pct || 4;
+    fPension.value = conf.descuento_pension_pct || 4;
+    fAux.value = conf.auxilio_transporte_mensual || 162000;
+    fCes.value = conf.provision_cesantias_pct || 8.33;
+    fIntCes.value = conf.provision_intereses_cesantias_pct || 1.0;
+    fPrima.value = conf.provision_prima_pct || 8.33;
+    fVac.value = conf.provision_vacaciones_pct || 4.17;
 
     const form = document.getElementById("confForm");
     if (form) {
@@ -437,19 +431,28 @@ class HRController {
         this.store.saveConfig({
           hora_inicio_nocturna: fHoraNoc.value,
           hora_fin_nocturna: fFinNoc.value,
+          recargo_nocturno_pct: parseFloat(fRecNoc.value) || 35,
           recargo_extra_diurna_pct: parseFloat(fExDia.value) || 25,
           recargo_extra_nocturna_pct: parseFloat(fExNoc.value) || 75,
           recargo_festivo_pct: parseFloat(fFest.value) || 75,
-          recargo_nocturno_pct: parseFloat(fRecNoc.value) || 35,
-          bssid_red_autorizada: fBssid.value.trim()
+          recargo_extra_festivo_diurna_pct: parseFloat(fExFestDia.value) || 100,
+          recargo_extra_festivo_nocturna_pct: parseFloat(fExFestNoc.value) || 150,
+          descuento_salud_pct: parseFloat(fSalud.value) || 4,
+          descuento_pension_pct: parseFloat(fPension.value) || 4,
+          auxilio_transporte_mensual: parseFloat(fAux.value) || 162000,
+          provision_cesantias_pct: parseFloat(fCes.value) || 8.33,
+          provision_intereses_cesantias_pct: parseFloat(fIntCes.value) || 1.0,
+          provision_prima_pct: parseFloat(fPrima.value) || 8.33,
+          provision_vacaciones_pct: parseFloat(fVac.value) || 4.17
         });
-        alert("Parámetros laborales guardados correctamente.");
+        alert("Parámetros laborales y porcentajes de ley guardados.");
         this.renderHome();
       };
     }
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+// Inicialización blindada: Solo corre cuando el DOM está completamente parsed
+window.addEventListener("DOMContentLoaded", () => {
   new HRController();
 });
