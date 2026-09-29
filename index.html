@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Kora Gestión Humana</title>
   <link rel="stylesheet" href="css/styles.css">
-  <script src="https://cdn.jsdelivr.net/gh/KoraDevsOrg/kora-web-sdk@main/kora-sync.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/KoraDevsOrg/kora-web-sdk@main/kora-sync.js"></script>[cite: 1]
 </head>
 <body>
 
@@ -19,7 +19,7 @@
       <button id="btnCloseDrawer" class="btn-icon">✕</button>
     </div>
     
-    <div class="drawer-section-title">SUITE DE NEGOCIO DESCENTRALIZADA</div>
+    <div class="drawer-section-title">SUITE DE NEGOCIO</div>
     <nav class="drawer-list">
       <button class="drawer-item" data-action="ext-inventario">📦 Gestión de Inventario</button>
       <button class="drawer-item" data-action="ext-fabricacion">⚙️ Fabricación & Órdenes</button>
@@ -59,24 +59,40 @@
       <div class="hub-card" id="btnActionEmployees">
         <div class="hub-icon-badge icon-purple">👥</div>
         <div class="hub-info">
-          <div class="hub-title">Colaboradores & Salarios</div>
-          <div class="hub-desc">Fichas de personal, roles y cálculo del costo por minuto.</div>
-        </div>
-      </div>
-
-      <div class="hub-card" id="btnActionNewEmp">
-        <div class="hub-icon-badge icon-blue">➕</div>
-        <div class="hub-info">
-          <div class="hub-title">Registrar Colaborador</div>
-          <div class="hub-desc">Alta de personal fijo, por día, por hora o para el propio dueño.</div>
+          <div class="hub-title">Colaboradores & Hoja de Vida</div>
+          <div class="hub-desc">Fichas de personal, estudios, hijos, contacto y cálculo $/minuto.</div>
         </div>
       </div>
 
       <div class="hub-card" id="btnActionTurnos">
         <div class="hub-icon-badge icon-orange">⏱️</div>
         <div class="hub-info">
-          <div class="hub-title">Control de Asistencia & Turnos</div>
-          <div class="hub-desc">Registro de entradas, salidas y liquidación del costo de jornada.</div>
+          <div class="hub-title">Control de Asistencia & Horas Extras</div>
+          <div class="hub-desc">Entradas, salidas, recargos nocturnos y festivos discriminados.</div>
+        </div>
+      </div>
+
+      <div class="hub-card" id="btnActionNovedades">
+        <div class="hub-icon-badge icon-blue">📋</div>
+        <div class="hub-info">
+          <div class="hub-title">Novedades & Ausencias</div>
+          <div class="hub-desc">Incapacidades médicas, vacaciones y permisos no remunerados.</div>
+        </div>
+      </div>
+
+      <div class="hub-card" id="btnActionNomina">
+        <div class="hub-icon-badge icon-green">💰</div>
+        <div class="hub-info">
+          <div class="hub-title">Liquidación de Nómina & Pagos</div>
+          <div class="hub-desc">Cálculo de neto a pagar con descuentos, devengados y registro histórico.</div>
+        </div>
+      </div>
+
+      <div class="hub-card" id="btnActionConfig">
+        <div class="hub-icon-badge icon-gold">⚙️</div>
+        <div class="hub-info">
+          <div class="hub-title">Configuración Legal & Jornada</div>
+          <div class="hub-desc">Horarios diurnos/nocturnos, porcentajes de ley, festivos y clave maestra.</div>
         </div>
       </div>
     </div>
@@ -96,7 +112,7 @@
     <div id="employeesListContainer" class="items-list"></div>
   </template>
 
-  <!-- 3. FORMULARIO: REGISTRAR / EDITAR COLABORADOR -->
+  <!-- 3. FORMULARIO: REGISTRAR / EDITAR COLABORADOR (CON HOJA DE VIDA Y HABEAS DATA) -->
   <template id="tmpl-emp-form-view">
     <div class="card">
       <div class="card-header-bar" style="margin-bottom: 14px;">
@@ -109,17 +125,17 @@
         
         <div class="form-group">
           <label>Nombre Completo:</label>
-          <input type="text" id="empNombre" class="input-field" required placeholder="Ej: Pedro Martínez, Juan Pérez">
+          <input type="text" id="empNombre" class="input-field" required placeholder="Ej: Pedro Martínez">
         </div>
 
         <div class="form-grid">
           <div class="form-group">
-            <label>Rol / Oficio:</label>
-            <input type="text" id="empRol" class="input-field" required placeholder="Ej: Operario, Cocinero, Lavador">
+            <label>Documento de Identidad (Cédula/DNI):</label>
+            <input type="text" id="empDoc" class="input-field" required placeholder="Obligatorio para nómina">
           </div>
           <div class="form-group">
-            <label>Documento / Cédula:</label>
-            <input type="text" id="empDoc" class="input-field" placeholder="Opcional">
+            <label>Rol / Oficio:</label>
+            <input type="text" id="empRol" class="input-field" required placeholder="Ej: Cocinero, Operario, Cajero">
           </div>
         </div>
 
@@ -127,31 +143,87 @@
           <div class="form-group">
             <label>Modalidad de Salario:</label>
             <select id="empTipoPago" class="input-field">
-              <option value="FIJO_MENSUAL">Fijo Mensual</option>
-              <option value="POR_HORA">Por Día / Por Hora</option>
-              <option value="DUENO">Sueldo Asignado al Dueño</option>
+              <option value="MENSUAL">Fijo Mensual</option>
+              <option value="DIARIO">Por Día</option>
+              <option value="HORA">Por Hora</option>
             </select>
           </div>
           <div class="form-group">
-            <label id="lblSalarioBase">Salario Mensual Pactado ($):</label>
-            <input type="number" step="any" id="empSalarioBase" class="input-field" value="1300000" required>
+            <label id="lblSalarioBase">Salario Base ($):</label>
+            <input type="number" step="any" id="empSalarioBase" class="input-field" value="1400000" required>
           </div>
         </div>
 
-        <!-- Calculadora Automática de Costo Minuto -->
+        <!-- Conversión Matemática a $/Minuto -->
         <div class="calc-highlight-box">
-          <div style="font-size: 0.8rem; color: var(--text-sub);">Costo Calculado para Producción y Mano de Obra:</div>
+          <div style="font-size: 0.8rem; color: var(--text-sub);">Costo por Minuto Calculado para Fabricación:</div>
           <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px;">
-            <span style="font-size: 0.75rem; color: var(--accent-blue);" id="lblCalcFormula">Basado en 8h/día (48h sem)</span>
+            <span style="font-size: 0.75rem; color: var(--accent-blue);" id="lblCalcFormula">Jornada 240 horas/mes</span>
             <div style="font-size: 1.35rem; font-weight: 800; color: var(--accent-gold);">
-              $<span id="outCostoMinuto">112.85</span> <small style="font-size:0.8rem;">/ min</small>
+              $<span id="outCostoMinuto">97.22</span> <small style="font-size:0.8rem;">/ min</small>
             </div>
           </div>
         </div>
 
-        <div class="form-group" style="margin-top: 10px;">
-          <label>Teléfono de Contacto:</label>
-          <input type="text" id="empTelefono" class="input-field" placeholder="Ej: 300 123 4567">
+        <!-- Horario Programado para cálculo de Horas Extras -->
+        <div class="form-grid" style="margin-top: 10px;">
+          <div class="form-group">
+            <label>Hora Entrada Programada:</label>
+            <input type="time" id="empHoraEntrada" class="input-field" value="08:00">
+          </div>
+          <div class="form-group">
+            <label>Hora Salida Programada:</label>
+            <input type="time" id="empHoraSalida" class="input-field" value="17:00">
+          </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border); margin: 16px 0;">
+        <h3 style="font-size: 0.85rem; color: var(--accent-gold); margin-bottom: 8px;">Hoja de Vida & Bienestar (Opcional)</h3>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nivel Educativo:</label>
+            <select id="empEstudios" class="input-field">
+              <option value="Bachiller">Bachiller</option>
+              <option value="Técnico/Tecnólogo">Técnico / Tecnólogo</option>
+              <option value="Profesional">Profesional</option>
+              <option value="Primaria">Básica Primaria</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Estado Civil:</label>
+            <select id="empEstadoCivil" class="input-field">
+              <option value="Soltero/a">Soltero/a</option>
+              <option value="Casado/a">Casado/a</option>
+              <option value="Unión Libre">Unión Libre</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Número de Hijos:</label>
+            <input type="number" id="empHijos" class="input-field" value="0" min="0">
+          </div>
+          <div class="form-group">
+            <label>Teléfono de Contacto:</label>
+            <input type="text" id="empTelefono" class="input-field" placeholder="Ej: 3001234567">
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Contacto de Emergencia:</label>
+            <input type="text" id="empEmergenciaNombre" class="input-field" placeholder="Nombre familiar">
+          </div>
+          <div class="form-group">
+            <label>Teléfono Emergencia:</label>
+            <input type="text" id="empEmergenciaTel" class="input-field" placeholder="Teléfono familiar">
+          </div>
+        </div>
+
+        <div class="habeas-data-box">
+          🔒 <strong>Aviso de Habeas Data y Privacidad:</strong> La información personal y familiar recopilada permanece almacenada exclusivamente en este dispositivo móvil (LOCAL_SCOPE). No se comparte con terceros ni servicios en la nube. Solo se sincroniza de forma cifrada entre los teléfonos de la red local autorizada en el establecimiento[cite: 5, 8].
         </div>
 
         <div class="form-actions" style="margin-top: 18px;">
@@ -165,13 +237,12 @@
   <!-- 4. VISTA: CONTROL DE ASISTENCIA Y TURNOS -->
   <template id="tmpl-turnos-view">
     <div class="card-header-bar" style="margin-bottom: 14px;">
-      <h2 style="font-size: 1.1rem; color: #fff; font-weight: 800;">Turnos & Asistencia</h2>
+      <h2 style="font-size: 1.1rem; color: #fff; font-weight: 800;">Turnos & Horas Extras</h2>
       <button type="button" class="btn-icon" id="btnBackHomeTurnos">←</button>
     </div>
 
-    <!-- Apertura de Turno Rápido -->
     <div class="card">
-      <h3 style="font-size: 0.95rem; color: var(--accent-gold); margin-bottom: 10px;">Iniciar Nueva Jornada</h3>
+      <h3 style="font-size: 0.95rem; color: var(--accent-gold); margin-bottom: 10px;">Registrar Entrada</h3>
       <div style="display: flex; gap: 8px;">
         <select id="selEmpTurno" class="input-field" style="flex: 2;"></select>
         <button id="btnStartTurno" class="btn-primary" style="flex: 1; padding: 10px 14px; font-size: 0.85rem;">
@@ -180,15 +251,14 @@
       </div>
     </div>
 
-    <!-- Lista de Turnos -->
     <div class="table-container">
       <table>
         <thead>
           <tr>
             <th>Colaborador</th>
-            <th>Entrada</th>
-            <th>Salida / Min</th>
-            <th>Costo Jornada</th>
+            <th>Jornada</th>
+            <th>Extras</th>
+            <th>Costo Total</th>
             <th>Acción</th>
           </tr>
         </thead>
@@ -197,7 +267,167 @@
     </div>
   </template>
 
-  <!-- Script Controlador Modular -->
+  <!-- 5. VISTA: NOVEDADES Y AUSENCIAS -->
+  <template id="tmpl-novedades-view">
+    <div class="card-header-bar" style="margin-bottom: 14px;">
+      <h2 style="font-size: 1.1rem; color: #fff; font-weight: 800;">Novedades Laborales</h2>
+      <button type="button" class="btn-icon" id="btnBackHomeNovs">←</button>
+    </div>
+
+    <div class="card">
+      <h3 style="font-size: 0.95rem; color: var(--accent-gold); margin-bottom: 12px;">Reportar Novedad</h3>
+      <form id="novForm">
+        <div class="form-group">
+          <label>Colaborador:</label>
+          <select id="novEmpleadoId" class="input-field" required></select>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Tipo de Novedad:</label>
+            <select id="novTipo" class="input-field">
+              <option value="INCAPACIDAD">Incapacidad Médica</option>
+              <option value="VACACIONES">Vacaciones</option>
+              <option value="PERMISO_NO_REMUNERADO">Permiso No Remunerado (Descuento)</option>
+              <option value="PERMISO_REMUNERADO">Permiso Remunerado</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Días de Duración:</label>
+            <input type="number" id="novDias" class="input-field" value="1" min="1" required>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Fecha Inicio:</label>
+            <input type="date" id="novFechaInicio" class="input-field" required>
+          </div>
+          <div class="form-group">
+            <label>Fecha Fin:</label>
+            <input type="date" id="novFechaFin" class="input-field" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Motivo / Observaciones:</label>
+          <input type="text" id="novMotivo" class="input-field" placeholder="Ej: Certificado EPS #440">
+        </div>
+        <button type="submit" class="btn-primary" style="margin-top: 8px;">Registrar Novedad</button>
+      </form>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Colaborador</th>
+            <th>Tipo</th>
+            <th>Días</th>
+            <th>Remunerada</th>
+          </tr>
+        </thead>
+        <tbody id="novedadesTbody"></tbody>
+      </table>
+    </div>
+  </template>
+
+  <!-- 6. VISTA: LIQUIDACIÓN DE NÓMINA -->
+  <template id="tmpl-nomina-view">
+    <div class="card-header-bar" style="margin-bottom: 14px;">
+      <h2 style="font-size: 1.1rem; color: #fff; font-weight: 800;">Liquidación de Nómina</h2>
+      <button type="button" class="btn-icon" id="btnBackHomeNom">←</button>
+    </div>
+
+    <div class="card">
+      <h3 style="font-size: 0.95rem; color: var(--accent-gold); margin-bottom: 12px;">Generar Liquidación</h3>
+      <div class="form-group">
+        <label>Colaborador:</label>
+        <select id="nomEmpleadoId" class="input-field"></select>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Desde:</label>
+          <input type="date" id="nomFechaInicio" class="input-field">
+        </div>
+        <div class="form-group">
+          <label>Hasta:</label>
+          <input type="date" id="nomFechaFin" class="input-field">
+        </div>
+      </div>
+      <button id="btnLiquidarNomina" class="btn-primary" style="margin-top: 8px;">
+        Calcular Liquidación con Descuentos
+      </button>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Periodo</th>
+            <th>Colaborador</th>
+            <th>Devengado</th>
+            <th>Deducciones</th>
+            <th>Neto Pagado</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody id="pagosTbody"></tbody>
+      </table>
+    </div>
+  </template>
+
+  <!-- 7. VISTA: CONFIGURACIÓN LEGAL Y RECARGOS -->
+  <template id="tmpl-config-view">
+    <div class="card-header-bar" style="margin-bottom: 14px;">
+      <h2 style="font-size: 1.1rem; color: #fff; font-weight: 800;">Configuración de Ley & Red</h2>
+      <button type="button" class="btn-icon" id="btnBackHomeConf">←</button>
+    </div>
+
+    <div class="card">
+      <h3 style="font-size: 0.95rem; color: var(--accent-gold); margin-bottom: 12px;">Parámetros Laborales</h3>
+      <form id="confForm">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Inicio Jornada Nocturna:</label>
+            <input type="time" id="confHoraNocturna" class="input-field" value="21:00">
+          </div>
+          <div class="form-group">
+            <label>Fin Jornada Nocturna:</label>
+            <input type="time" id="confFinNocturna" class="input-field" value="06:00">
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Recargo Extra Diurna (%):</label>
+            <input type="number" id="confExtraDiurna" class="input-field" value="25">
+          </div>
+          <div class="form-group">
+            <label>Recargo Extra Nocturna (%):</label>
+            <input type="number" id="confExtraNocturna" class="input-field" value="75">
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Recargo Festivo / Dominical (%):</label>
+            <input type="number" id="confFestivo" class="input-field" value="75">
+          </div>
+          <div class="form-group">
+            <label>Recargo Nocturno Ordinario (%):</label>
+            <input type="number" id="confRecargoNocturno" class="input-field" value="35">
+          </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border); margin: 16px 0;">
+        <h3 style="font-size: 0.85rem; color: var(--accent-blue); margin-bottom: 8px;">Seguridad de Red (Lugar de Trabajo)</h3>
+        <div class="form-group">
+          <label>Identificador Wi-Fi Autorizado (BSSID/MAC):</label>
+          <input type="text" id="confBssid" class="input-field" placeholder="Opcional: Permite sincronizar solo en la tienda">
+        </div>
+
+        <button type="submit" class="btn-primary" style="margin-top: 12px;">Guardar Parámetros de Ley</button>
+      </form>
+    </div>
+  </template>
+
+  <!-- Script Modular -->
   <script type="module" src="js/app.js"></script>
 </body>
 </html>
