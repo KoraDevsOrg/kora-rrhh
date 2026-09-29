@@ -4,456 +4,187 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Kora Gestión Humana</title>
-  <link rel="stylesheet" href="css/styles.css">
-  <script src="https://cdn.jsdelivr.net/gh/KoraDevsOrg/kora-web-sdk@main/kora-sync.js"></script>
+  <style>
+    :root {
+      --bg-color: #0a0f1d;
+      --surface: #141e33;
+      --surface-accent: #1e2c4a;
+      --surface-hover: #26385c;
+      --border: #243556;
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --accent-gold: #f59e0b;
+      --accent-gold-grad: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      --accent-blue-grad: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+      --accent-purple-grad: linear-gradient(135deg, #818cf8 0%, #4f46e5 100%);
+      --accent-orange-grad: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+      --accent-green-grad: linear-gradient(135deg, #34d399 0%, #059669 100%);
+      --accent-blue: #38bdf8;
+      --accent-green: #10b981;
+      --red-alert: #ef4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 14px 20px;
+      background-color: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    .btn-icon { background: transparent; border: none; color: var(--text-main); font-size: 1.4rem; cursor: pointer; }
+    .offline-badge { font-size: 0.65rem; text-transform: uppercase; padding: 4px 10px; background: rgba(56, 189, 248, 0.15); color: var(--accent-blue); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 9999px; font-weight: 700; }
+
+    main { flex: 1; padding: 20px 16px; max-width: 760px; margin: 0 auto; width: 100%; }
+
+    .hub-grid { display: flex; flex-direction: column; gap: 16px; margin-top: 10px; }
+    .hub-card {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      cursor: pointer;
+      text-align: left;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    }
+    .hub-card::after { content: "➔"; position: absolute; right: 20px; font-size: 1.2rem; color: var(--text-sub); }
+    .hub-card:active { transform: scale(0.98); background: var(--surface-hover); }
+
+    .hub-icon-badge {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      flex-shrink: 0;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+    }
+
+    .icon-blue { background: var(--accent-blue-grad); }
+    .icon-purple { background: var(--accent-purple-grad); }
+    .icon-orange { background: var(--accent-orange-grad); }
+    .icon-green { background: var(--accent-green-grad); }
+    .icon-gold { background: var(--accent-gold-grad); }
+
+    .hub-info { flex: 1; padding-right: 24px; }
+    .hub-title { font-size: 1.05rem; font-weight: 800; color: #ffffff; margin-bottom: 4px; }
+    .hub-desc { font-size: 0.8rem; color: var(--text-sub); line-height: 1.35; }
+
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+    .card-header-bar { display: flex; justify-content: space-between; align-items: center; }
+    .card-title { font-size: 1.15rem; font-weight: 800; color: var(--text-main); }
+
+    .btn-primary {
+      background: var(--accent-gold-grad);
+      color: #0b1120;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 0.95rem;
+      cursor: pointer;
+      width: 100%;
+    }
+    .btn-secondary { background: var(--surface-accent); color: var(--text-main); border: 1px solid var(--border); padding: 12px 18px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+    .btn-sm { font-size: 0.8rem; padding: 6px 12px; border-radius: 8px; font-weight: 700; cursor: pointer; border: none; }
+
+    .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .form-group label { font-size: 0.8rem; font-weight: 600; color: var(--text-sub); }
+    .input-field { background: var(--surface-accent); border: 1px solid var(--border); color: var(--text-main); padding: 12px 14px; border-radius: 10px; font-size: 0.95rem; outline: none; width: 100%; }
+    .input-field:focus { border-color: var(--accent-blue); }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-actions { display: grid; grid-template-columns: 1fr 2fr; gap: 12px; margin-top: 16px; }
+
+    .calc-highlight-box {
+      background: #080d1a;
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin: 10px 0;
+      border: 1px solid var(--border);
+    }
+
+    .habeas-data-box {
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 0.78rem;
+      color: #bae6fd;
+      line-height: 1.4;
+      margin-top: 14px;
+    }
+
+    .table-container { width: 100%; overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); background: var(--surface-accent); margin-top: 10px; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; }
+    th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+    th { background: #0c1424; color: var(--text-sub); text-transform: uppercase; font-size: 0.7rem; font-weight: 700; }
+
+    .badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; }
+    .badge-active { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-progress { background: rgba(245, 158, 11, 0.15); color: var(--accent-gold); border: 1px solid rgba(245, 158, 11, 0.3); }
+
+    .drawer-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); opacity: 0; pointer-events: none; transition: opacity 0.2s ease; z-index: 40; }
+    .drawer-backdrop.active { opacity: 1; pointer-events: auto; }
+    .side-drawer { position: fixed; top: 0; left: 0; bottom: 0; width: 290px; background: var(--surface); border-right: 1px solid var(--border); transform: translateX(-100%); transition: transform 0.2s ease; z-index: 50; display: flex; flex-direction: column; }
+    .side-drawer.open { transform: translateX(0); }
+    .drawer-header { padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .drawer-section-title { font-size: 0.7rem; color: var(--text-sub); font-weight: bold; padding: 16px 20px 6px 20px; letter-spacing: 0.6px; }
+    .drawer-list { flex: 1; overflow-y: auto; }
+    .drawer-item { width: 100%; text-align: left; background: transparent; border: none; color: var(--text-main); padding: 14px 20px; font-size: 0.9rem; cursor: pointer; border-left: 4px solid transparent; display: flex; align-items: center; gap: 12px; }
+    .drawer-item.active { background: var(--surface-accent); border-left-color: var(--accent-gold); font-weight: bold; }
+  </style>
 </head>
 <body>
 
-  <!-- Backdrop del Drawer -->
   <div id="drawerBackdrop" class="drawer-backdrop"></div>
 
-  <!-- Menú Hamburguesa Lateral -->
   <aside id="sideDrawer" class="side-drawer">
     <div class="drawer-header">
       <h2 style="font-size: 1.15rem; font-weight: 800; color: #fff;">Ecosistema Kora</h2>
-      <button id="btnCloseDrawer" class="btn-icon">✕</button>
+      <button class="btn-icon" data-action="close-drawer">✕</button>
     </div>
     
     <div class="drawer-section-title">SUITE DE NEGOCIO</div>
     <nav class="drawer-list">
-      <button class="drawer-item" data-action="ext-inventario">📦 Gestión de Inventario</button>
-      <button class="drawer-item" data-action="ext-fabricacion">⚙️ Fabricación & Órdenes</button>
-      <button class="drawer-item" data-action="ext-ventas">🏷️ Ventas & Mostrador</button>
-      <button class="drawer-item" data-action="ext-costos">💡 Costos & Servicios</button>
-      <button class="drawer-item active" data-action="home">👥 Gestión Humana (RRHH)</button>
-      <button class="drawer-item" data-action="ext-financiero">📊 Financiero & Cuentas</button>
+      <button class="drawer-item" data-action="notice-inventario">📦 Gestión de Inventario</button>
+      <button class="drawer-item" data-action="notice-fabricacion">⚙️ Fabricación & Órdenes</button>
+      <button class="drawer-item" data-action="notice-ventas">🏷️ Ventas & Mostrador</button>
+      <button class="drawer-item" data-action="notice-costos">💡 Costos & Servicios</button>
+      <button class="drawer-item active" data-action="nav-home">👥 Gestión Humana (RRHH)</button>
+      <button class="drawer-item" data-action="notice-financiero">📊 Financiero & Cuentas</button>
     </nav>
   </aside>
 
-  <!-- Encabezado Principal -->
   <header>
     <div class="header-left">
-      <button id="btnOpenDrawer" class="btn-icon">☰</button>
+      <button class="btn-icon" data-action="open-drawer">☰</button>
       <h1 id="headerTitle" style="font-size: 1.1rem; font-weight: 800;">Kora RRHH</h1>
     </div>
     <div class="offline-badge">100% Offline</div>
   </header>
 
-  <!-- Contenedor Principal donde se montan las Vistas -->
   <main id="appContent"></main>
 
-  <!-- ========================================== -->
-  <!-- PLANTILLAS DE VISTAS (TEMPLATES)          -->
-  <!-- ========================================== -->
-
-  <!-- 1. PANTALLA PRINCIPAL: HUB TÁCTIL RRHH -->
-  <template id="tmpl-home-view">
-    <div class="hub-grid">
-      <div class="hub-card" id="btnActionEmployees">
-        <div class="hub-icon-badge icon-purple">👥</div>
-        <div class="hub-info">
-          <div class="hub-title">Colaboradores & Hoja de Vida</div>
-          <div class="hub-desc">Fichas de personal, estudios, hijos, contacto y cálculo $/minuto.</div>
-        </div>
-      </div>
-
-      <div class="hub-card" id="btnActionTurnos">
-        <div class="hub-icon-badge icon-orange">⏱️</div>
-        <div class="hub-info">
-          <div class="hub-title">Control de Asistencia & Extras</div>
-          <div class="hub-desc">Entradas, salidas, recargos nocturnos y festivos discriminados.</div>
-        </div>
-      </div>
-
-      <div class="hub-card" id="btnActionNovedades">
-        <div class="hub-icon-badge icon-blue">📋</div>
-        <div class="hub-info">
-          <div class="hub-title">Novedades & Ausencias</div>
-          <div class="hub-desc">Incapacidades médicas, vacaciones y permisos no remunerados.</div>
-        </div>
-      </div>
-
-      <div class="hub-card" id="btnActionNomina">
-        <div class="hub-icon-badge icon-green">💰</div>
-        <div class="hub-info">
-          <div class="hub-title">Nómina, Salud, Pensión & Cesantías</div>
-          <div class="hub-desc">Liquidación legal: devengados, descuentos y prestaciones sociales.</div>
-        </div>
-      </div>
-
-      <div class="hub-card" id="btnActionConfig">
-        <div class="hub-icon-badge icon-gold">⚙️</div>
-        <div class="hub-info">
-          <div class="hub-title">Configuración Legal & Porcentajes</div>
-          <div class="hub-desc">Ajuste de % para extras, nocturnas, festivos, salud y cesantías.</div>
-        </div>
-      </div>
-    </div>
-  </template>
-
-  <!-- 2. VISTA: LISTA DE COLABORADORES -->
-  <template id="tmpl-employees-view">
-    <div class="card-header-bar" style="margin-bottom: 14px;">
-      <h2 style="font-size: 1.1rem; color: #fff; font-weight: 800;">Equipo de Trabajo</h2>
-      <button type="button" class="btn-icon" id="btnBackHomeEmp">←</button>
-    </div>
-
-    <div style="margin-bottom: 14px;">
-      <button id="btnGoNewEmpFromList" class="btn-primary" style="width: 100%;">+ Nuevo Colaborador</button>
-    </div>
-
-    <div id="employeesListContainer" class="items-list"></div>
-  </template>
-
-  <!-- 3. FORMULARIO: REGISTRAR / EDITAR COLABORADOR -->
-  <template id="tmpl-emp-form-view">
-    <div class="card">
-      <div class="card-header-bar" style="margin-bottom: 14px;">
-        <h2 class="card-title" id="empFormTitle">Ficha del Colaborador</h2>
-        <button type="button" class="btn-icon" id="btnBackEmpForm">←</button>
-      </div>
-
-      <form id="empForm">
-        <input type="hidden" id="empId">
-        
-        <div class="form-group">
-          <label>Nombre Completo:</label>
-          <input type="text" id="empNombre" class="input-field" required placeholder="Ej: Pedro Martínez">
-        </div>
-
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Documento de Identidad (Cédula/DNI):</label>
-            <input type="text" id="empDoc" class="input-field" required placeholder="Obligatorio para nómina">
-          </div>
-          <div class="form-group">
-            <label>Rol / Oficio:</label>
-            <input type="text" id="empRol" class="input-field" required placeholder="Ej: Cocinero, Cajero, Operario">
-          </div>
-        </div>
-
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Modalidad de Salario:</label>
-            <select id="empTipoPago" class="input-field">
-              <option value="MENSUAL">Fijo Mensual</option>
-              <option value="DIARIO">Por Día</option>
-              <option value="HORA">Por Hora</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label id="lblSalarioBase">Salario Mensual ($):</label>
-            <input type="number" step="any" id="empSalarioBase" class="input-field" value="1300000" required>
-          </div>
-        </div>
-
-        <!-- Conversión Matemática a $/Minuto para Fabricación -->
-        <div class="calc-highlight-box">
-          <div style="font-size: 0.8rem; color: var(--text-sub);">Costo Calculado para Mano de Obra:</div>
-          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px;">
-            <span style="font-size: 0.75rem; color: var(--accent-blue);" id="lblCalcFormula">Jornada mensual (14.400 min)</span>
-            <div style="font-size: 1.35rem; font-weight: 800; color: var(--accent-gold);">
-              $<span id="outCostoMinuto">90.27</span> <small style="font-size:0.8rem;">/ min</small>
-            </div>
-          </div>
-        </div>
-
-        <hr style="border: 0; border-top: 1px solid var(--border); margin: 16px 0;">
-        <h3 style="font-size: 0.85rem; color: var(--accent-gold); margin-bottom: 8px;">Hoja de Vida & Bienestar (Opcional)</h3>
-
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Nivel Educativo:</label>
-            <select id="empEstudios" class="input-field">
-              <option value="Bachiller">Bachiller</option>
-              <option value="Técnico/Tecnólogo">Técnico / Tecnólogo</option>
-              <option value="Profesional">Profesional</option>
-              <option value="Primaria">Básica Primaria</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Estado Civil:</label>
-            <select id="empEstadoCivil" class="input-field">
-              <option value="Soltero/a">Soltero/a</option>
-              <option value="Casado/a">Casado/a</option>
-              <option value="Unión Libre">Unión Libre</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Número de Hijos:</label>
-            <input type="number" id="empHijos" class="input-field" value="0" min="0">
-          </div>
-          <div class="form-group">
-            <label>Teléfono de Contacto:</label>
-            <input type="text" id="empTelefono" class="input-field" placeholder="Ej: 3001234567">
-          </div>
-        </div>
-
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Contacto de Emergencia:</label>
-            <input type="text" id="empEmergenciaNombre" class="input-field" placeholder="Nombre familiar">
-          </div>
-          <div class="form-group">
-            <label>Teléfono Emergencia:</label>
-            <input type="text" id="empEmergenciaTel" class="input-field" placeholder="Teléfono familiar">
-          </div>
-        </div>
-
-        <div class="habeas-data-box">
-          🔒 <strong>Aviso de Habeas Data y Privacidad:</strong> La información personal y familiar recopilada permanece almacenada exclusivamente en este dispositivo móvil (LOCAL_SCOPE)[cite: 7]. No se comparte con servidores en la nube ni terceros[cite: 7].
-        </div>
-
-        <div class="form-actions" style="margin-top: 18px;">
-          <button type="button" class="btn-secondary" id="btnCancelEmp">Cancelar</button>
-          <button type="submit" class="btn-primary">Guardar Colaborador</button>
-        </div>
-      </form>
-    </div>
-  </template>
-
-  <!-- 4. VISTA: CONTROL DE ASISTENCIA Y TURNOS -->
-  <template id="tmpl-turnos-view">
-    <div class="card-header-bar" style="margin-bottom: 14px;">
-      <h2 style="font-size: 1.1rem; color: #fff; font-weight: 800;">Turnos & Horas Extras</h2>
-      <button type="button" class="btn-icon" id="btnBackHomeTurnos">←</button>
-    </div>
-
-    <div class="card">
-      <h3 style="font-size: 0.95rem; color: var(--accent-gold); margin-bottom: 10px;">Registrar Entrada</h3>
-      <div style="display: flex; gap: 8px;">
-        <select id="selEmpTurno" class="input-field" style="flex: 2;"></select>
-        <button id="btnStartTurno" class="btn-primary" style="flex: 1; padding: 10px 14px; font-size: 0.85rem;">
-          ▶ Entrada
-        </button>
-      </div>
-    </div>
-
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Colaborador</th>
-            <th>Jornada</th>
-            <th>Extras</th>
-            <th>Costo Total</th>
-            <th>Acción</th>
-          </tr>
-        </thead>
-        <tbody id="turnosTbody"></tbody>
-      </table>
-    </div>
-  </template>
-
-  <!-- 5. VISTA: NOVEDADES Y AUSENCIAS -->
-  <template id="tmpl-novedades-view">
-    <div class="card-header-bar" style="margin-bottom: 14px;">
-      <h2 style="font-size: 1.1rem; color: #fff; font-weight: 800;">Novedades Laborales</h2>
-      <button type="button" class="btn-icon" id="btnBackHomeNovs">←</button>
-    </div>
-
-    <div class="card">
-      <h3 style="font-size: 0.95rem; color: var(--accent-gold); margin-bottom: 12px;">Reportar Novedad</h3>
-      <form id="novForm">
-        <div class="form-group">
-          <label>Colaborador:</label>
-          <select id="novEmpleadoId" class="input-field" required></select>
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Tipo de Novedad:</label>
-            <select id="novTipo" class="input-field">
-              <option value="INCAPACIDAD_ENFERMEDAD_GENERAL">Incapacidad (Enfermedad General - 66%)</option>
-              <option value="INCAPACIDAD_LABORAL">Incapacidad (Accidente Laboral - 100%)</option>
-              <option value="VACACIONES">Vacaciones Remuneradas (100%)</option>
-              <option value="PERMISO_NO_REMUNERADO">Permiso No Remunerado (0% Descuento)</option>
-              <option value="LICENCIA_MATERNIDAD_PATERNIDAD">Licencia Maternidad / Paternidad (100%)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Días de Duración:</label>
-            <input type="number" id="novDias" class="input-field" value="1" min="1" required>
-          </div>
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Fecha Inicio:</label>
-            <input type="date" id="novFechaInicio" class="input-field" required>
-          </div>
-          <div class="form-group">
-            <label>Fecha Fin:</label>
-            <input type="date" id="novFechaFin" class="input-field" required>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Motivo / Soporte Médico:</label>
-          <input type="text" id="novMotivo" class="input-field" placeholder="Ej: Certificado EPS #9923">
-        </div>
-        <button type="submit" class="btn-primary" style="margin-top: 8px;">Registrar Novedad</button>
-      </form>
-    </div>
-
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Colaborador</th>
-            <th>Tipo</th>
-            <th>Días</th>
-            <th>Pago %</th>
-          </tr>
-        </thead>
-        <tbody id="novedadesTbody"></tbody>
-      </table>
-    </div>
-  </template>
-
-  <!-- 6. VISTA: LIQUIDACIÓN COMPLETA (SALUD, PENSIÓN Y CESANTÍAS) -->
-  <template id="tmpl-nomina-view">
-    <div class="card-header-bar" style="margin-bottom: 14px;">
-      <h2 style="font-size: 1.1rem; color: #fff; font-weight: 800;">Liquidación de Nómina Legal</h2>
-      <button type="button" class="btn-icon" id="btnBackHomeNom">←</button>
-    </div>
-
-    <div class="card">
-      <h3 style="font-size: 0.95rem; color: var(--accent-gold); margin-bottom: 12px;">Generar Liquidación Periódica</h3>
-      <div class="form-group">
-        <label>Colaborador:</label>
-        <select id="nomEmpleadoId" class="input-field"></select>
-      </div>
-      <div class="form-grid">
-        <div class="form-group">
-          <label>Desde:</label>
-          <input type="date" id="nomFechaInicio" class="input-field">
-        </div>
-        <div class="form-group">
-          <label>Hasta:</label>
-          <input type="date" id="nomFechaFin" class="input-field">
-        </div>
-      </div>
-      <button id="btnLiquidarNomina" class="btn-primary" style="margin-top: 8px;">
-        Liquidar (Aplica Salud, Pensión, Cesantías y Novedades)
-      </button>
-    </div>
-
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Periodo</th>
-            <th>Colaborador</th>
-            <th>Base + Extras</th>
-            <th>Deducciones (Salud+Pens+Nov)</th>
-            <th>Neto Pagar</th>
-            <th>Prestaciones (Cesantías+Prima)</th>
-            <th>Estado</th>
-          </tr>
-        </thead>
-        <tbody id="pagosTbody"></tbody>
-      </table>
-    </div>
-  </template>
-
-  <!-- 7. VISTA: CONFIGURACIÓN LEGAL, PORCENTAJES Y SEGURIDAD -->
-  <template id="tmpl-config-view">
-    <div class="card-header-bar" style="margin-bottom: 14px;">
-      <h2 style="font-size: 1.1rem; color: #fff; font-weight: 800;">Configuración de Ley & Porcentajes</h2>
-      <button type="button" class="btn-icon" id="btnBackHomeConf">←</button>
-    </div>
-
-    <div class="card">
-      <h3 style="font-size: 0.95rem; color: var(--accent-gold); margin-bottom: 12px;">1. Horarios y Recargos de Trabajo</h3>
-      <form id="confForm">
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Inicio Jornada Nocturna:</label>
-            <input type="time" id="confHoraNocturna" class="input-field" value="21:00">
-          </div>
-          <div class="form-group">
-            <label>Fin Jornada Nocturna:</label>
-            <input type="time" id="confFinNocturna" class="input-field" value="06:00">
-          </div>
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Recargo Nocturno Ordinario (%):</label>
-            <input type="number" step="any" id="confRecargoNocturno" class="input-field" value="35">
-          </div>
-          <div class="form-group">
-            <label>Recargo Extra Diurna (%):</label>
-            <input type="number" step="any" id="confExtraDiurna" class="input-field" value="25">
-          </div>
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Recargo Extra Nocturna (%):</label>
-            <input type="number" step="any" id="confExtraNocturna" class="input-field" value="75">
-          </div>
-          <div class="form-group">
-            <label>Recargo Dominical / Festivo (%):</label>
-            <input type="number" step="any" id="confFestivo" class="input-field" value="75">
-          </div>
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Extra Festivo Diurno (%):</label>
-            <input type="number" step="any" id="confExtraFestivoDia" class="input-field" value="100">
-          </div>
-          <div class="form-group">
-            <label>Extra Festivo Nocturno (%):</label>
-            <input type="number" step="any" id="confExtraFestivoNoc" class="input-field" value="150">
-          </div>
-        </div>
-
-        <hr style="border: 0; border-top: 1px solid var(--border); margin: 16px 0;">
-        <h3 style="font-size: 0.95rem; color: var(--accent-gold); margin-bottom: 12px;">2. Seguridad Social & Deducciones de Ley</h3>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Deducción Salud Trabajador (%):</label>
-            <input type="number" step="any" id="confDescSalud" class="input-field" value="4">
-          </div>
-          <div class="form-group">
-            <label>Deducción Pensión Trabajador (%):</label>
-            <input type="number" step="any" id="confDescPension" class="input-field" value="4">
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Auxilio de Transporte Mensual ($):</label>
-          <input type="number" step="any" id="confAuxTransporte" class="input-field" value="162000">
-        </div>
-
-        <hr style="border: 0; border-top: 1px solid var(--border); margin: 16px 0;">
-        <h3 style="font-size: 0.95rem; color: var(--accent-gold); margin-bottom: 12px;">3. Prestaciones Sociales (Provisión Empresa)</h3>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Cesantías (%):</label>
-            <input type="number" step="any" id="confCesantias" class="input-field" value="8.33">
-          </div>
-          <div class="form-group">
-            <label>Intereses de Cesantías (%):</label>
-            <input type="number" step="any" id="confInteresesCesantias" class="input-field" value="1.0">
-          </div>
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Prima de Servicios (%):</label>
-            <input type="number" step="any" id="confPrima" class="input-field" value="8.33">
-          </div>
-          <div class="form-group">
-            <label>Vacaciones (%):</label>
-            <input type="number" step="any" id="confVacaciones" class="input-field" value="4.17">
-          </div>
-        </div>
-
-        <button type="submit" class="btn-primary" style="margin-top: 14px;">Guardar Parámetros de Ley</button>
-      </form>
-    </div>
-  </template>
-
-  <!-- Script Modular -->
-  <script type="module" src="js/app.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>
